@@ -6,3 +6,4 @@ reports/
 .idea/
 .DS_Store
 docs/
+*.tsbuildinfo
