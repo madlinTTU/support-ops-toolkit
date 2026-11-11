@@ -5,7 +5,7 @@ CREATE TABLE tickets (
   body text NOT NULL,
   customer_email text NOT NULL,
   channel text NOT NULL CHECK (channel IN ('email', 'chat', 'web_form')),
-  category text CHECK (category IN ('account_access', 'billing', 'data_change', 'bug', 'how_to', 'other')),
+  category text,
   priority text CHECK (priority IN ('critical', 'high', 'normal', 'low')),
   tags text[] NOT NULL DEFAULT '{}',
   status text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'queued', 'in_progress', 'closed')),
