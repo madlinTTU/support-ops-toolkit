@@ -13,6 +13,7 @@ export interface ClosedTicket {
 export interface RecurringGroup {
   category: string
   representativeSubject: string
+  representativeBody: string
   tickets: ClosedTicket[]
 }
 
@@ -39,9 +40,11 @@ export function findRecurringGroups(tickets: ClosedTicket[]): RecurringGroup[] {
     const groups = mergeSimilar(items)
     const bigGroups = groups.filter((group) => group.length >= MIN_GROUP_SIZE)
     for (const group of bigGroups) {
+      const typical = pickMostTypical(group).ticket
       result.push({
         category,
-        representativeSubject: pickMostTypical(group).ticket.subject,
+        representativeSubject: typical.subject,
+        representativeBody: typical.body,
         tickets: group.map((item) => item.ticket).sort((a, b) => a.id - b.id),
       })
     }

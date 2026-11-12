@@ -11,6 +11,7 @@ export class KbCandidateResponse {
   @ApiProperty() id: number
   @ApiProperty() category: string
   @ApiProperty() subject: string
+  @ApiProperty({ description: 'The text of the most typical ticket of the group' }) exampleText: string
   @ApiProperty() ticketCount: number
   @ApiProperty({ enum: KB_CANDIDATE_STATUSES }) status: KbCandidateStatus
   @ApiProperty({ type: String, format: 'date-time' }) firstSeenAt: Date

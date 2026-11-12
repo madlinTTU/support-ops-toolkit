@@ -11,15 +11,17 @@ const SELECT_CLOSED = `
   ORDER BY id
 `
 const INSERT_CANDIDATE = `
-  INSERT INTO kb_candidates (category, representative_subject, ticket_count, first_seen_at, last_seen_at)
-  VALUES ($1, $2, $3, $4, $5)
+  INSERT INTO kb_candidates (category, representative_subject, ticket_count, first_seen_at, last_seen_at,
+                             representative_body)
+  VALUES ($1, $2, $3, $4, $5, $6)
   RETURNING id
 `
 
 const UPDATE_CANDIDATE = `
   UPDATE kb_candidates
-  SET category = $1, representative_subject = $2, ticket_count = $3, first_seen_at = $4, last_seen_at = $5
-  WHERE id = $6
+  SET category = $1, representative_subject = $2, ticket_count = $3, first_seen_at = $4, last_seen_at = $5,
+      representative_body = $6
+  WHERE id = $7
 `
 
 const LINK_TICKETS = 'UPDATE tickets SET kb_candidate_id = $1 WHERE id = ANY($2)'
@@ -66,6 +68,7 @@ export class KbService {
       group.tickets.length,
       new Date(Math.min(...times)),
       new Date(Math.max(...times)),
+      group.representativeBody,
     ]
 
     const existingId = findExistingCandidateId(group, usedCandidateIds)
