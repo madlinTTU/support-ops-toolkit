@@ -9,7 +9,7 @@ interface TicketTableProps {
   onSelect: (id: number) => void
 }
 
-const HEADER = 'px-4 py-3 text-left text-sm font-medium text-muted'
+const HEADER = 'px-3 py-3 text-left text-sm font-medium text-muted'
 
 // The coloured edge shows which row is selected (blue) or escalated (red).
 function rowStyle(ticket: Ticket, selected: boolean): string {
@@ -40,8 +40,8 @@ export function TicketTable({ tickets, selectedId, onSelect }: TicketTableProps)
               onClick={() => onSelect(ticket.id)}
               className={`cursor-pointer transition-colors ${rowStyle(ticket, ticket.id === selectedId)}`}
             >
-              <td className="px-4 py-3 text-muted">{ticket.id}</td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3 text-muted">{ticket.id}</td>
+              <td className="px-3 py-3">
                 <button type="button" onClick={() => onSelect(ticket.id)} className="text-left font-medium">
                   {ticket.subject}
                 </button>
@@ -51,14 +51,14 @@ export function TicketTable({ tickets, selectedId, onSelect }: TicketTableProps)
                   </span>
                 )}
               </td>
-              <td className="px-4 py-3 text-muted">{humanize(ticket.category)}</td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3 text-muted">{humanize(ticket.category)}</td>
+              <td className="px-3 py-3">
                 <PriorityLabel priority={ticket.priority} />
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 <TimeLeft ticket={ticket} />
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 <StatusLabel status={ticket.status} />
               </td>
             </tr>
