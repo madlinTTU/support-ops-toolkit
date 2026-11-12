@@ -1,11 +1,13 @@
 export const TICKET_STATUSES = ['new', 'queued', 'in_progress', 'closed'] as const
 export const TICKET_CATEGORIES = ['account_access', 'billing', 'data_change', 'bug', 'how_to', 'other'] as const
 
+export const KB_CANDIDATE_STATUSES = ['proposed', 'accepted', 'dismissed'] as const
+
+export type KbCandidateStatus = (typeof KB_CANDIDATE_STATUSES)[number]
 export type TicketStatus = (typeof TICKET_STATUSES)[number]
 export type TicketCategory = (typeof TICKET_CATEGORIES)[number]
 export type TicketPriority = 'critical' | 'high' | 'normal' | 'low'
 export type TicketChannel = 'email' | 'chat' | 'web_form'
-export type KbCandidateStatus = 'proposed' | 'accepted' | 'dismissed'
 export type KbDecision = 'accepted' | 'dismissed'
 
 export interface Ticket {
@@ -51,6 +53,16 @@ export interface KbCandidate {
 export interface TicketFilters {
   status: TicketStatus | 'all'
   category: TicketCategory | 'all'
+}
+
+export interface TicketQuery extends TicketFilters {
+  search: string
+}
+
+export interface KbCandidateQuery {
+  category: TicketCategory | 'all'
+  status: KbCandidateStatus | 'all'
+  search: string
 }
 
 export interface ApiErrorBody {
