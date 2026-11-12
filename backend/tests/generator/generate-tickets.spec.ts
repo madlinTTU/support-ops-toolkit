@@ -1,4 +1,4 @@
-import { generateTickets } from '../../scripts/generator/generate-tickets.js'
+import { generateTickets } from '../../src/demo/generator/generate-tickets.js'
 import { SLA_HOURS } from '../../src/sla/sla.constants.js'
 
 const HOUR_MS = 3_600_000
