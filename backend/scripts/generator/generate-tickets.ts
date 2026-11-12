@@ -32,9 +32,13 @@ export const PERIOD_DAYS = 30
 // One-off tickets are noise: they appear once and must not become knowledge-base candidates.
 const MAX_ONE_OFF_TICKETS = 8
 const CUSTOMER_POOL_SIZE = 120
-// A share of tickets is handled slowly (SLOW_FACTOR times longer), so some of them miss their SLA.
-const SLOW_SHARE = 0.3
-const SLOW_FACTOR = 2.5
+// Time from creation to closing as a share of the SLA window. Most tickets are closed inside the window (below 1),
+// a smaller share is late (above 1).
+const LATE_SHARE = 0.2
+const ON_TIME_RANGE = { min: 0.3, max: 0.95 }
+const LATE_RANGE = { min: 1.1, max: 2.5 }
+// The first response comes after this share of the time until closing.
+const FIRST_RESPONSE_RANGE = { min: 0.1, max: 0.6 }
 // Vague wording has no obvious keywords, so keyword-based triage is expected to miss some tickets.
 const VAGUE_SHARE = 0.15
 const EXTRA_SENTENCE_SHARE = 0.5
@@ -47,14 +51,6 @@ const CHANNELS: { value: TicketChannel; weight: number }[] = [
   { value: 'web_form', weight: 30 },
   { value: 'chat', weight: 20 },
 ]
-
-// Time from the first response to the closing, by priority. SLA_HOURS only limits the first response.
-const RESOLUTION_BASE_HOURS: Record<TicketPriority, number> = {
-  critical: 12,
-  high: 36,
-  normal: 96,
-  low: 144,
-}
 
 export function generateTickets({ count, seed, now }: GenerateOptions): GeneratedTicket[] {
   faker.seed(seed)
@@ -107,11 +103,12 @@ function buildBody(text: string, extras: string[]): string {
 // Simulates a human agent: when the first reply happens and when the ticket is closed.
 // If a moment is still in the future, the ticket has not got that far yet and stays open.
 function simulateAgent(priority: TicketPriority, createdAt: Date, now: Date) {
-  const slowFactor = faker.datatype.boolean({ probability: SLOW_SHARE }) ? SLOW_FACTOR : 1
-  const firstResponseHours = SLA_HOURS[priority] * faker.number.float({ min: 0.1, max: 0.9 }) * slowFactor
-  const resolutionHours = RESOLUTION_BASE_HOURS[priority] * faker.number.float({ min: 0.5, max: 1.5 }) * slowFactor
+  const isLate = faker.datatype.boolean({ probability: LATE_SHARE })
+  const slaShare = faker.number.float(isLate ? LATE_RANGE : ON_TIME_RANGE)
+  const closeHours = SLA_HOURS[priority] * slaShare
+  const firstResponseHours = closeHours * faker.number.float(FIRST_RESPONSE_RANGE)
   const firstResponseAt = new Date(createdAt.getTime() + firstResponseHours * HOUR_MS)
-  const closedAt = new Date(firstResponseAt.getTime() + resolutionHours * HOUR_MS)
+  const closedAt = new Date(createdAt.getTime() + closeHours * HOUR_MS)
 
   if (closedAt <= now) {
     return { status: 'closed' as const, firstResponseAt, closedAt }
