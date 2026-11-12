@@ -1,1 +1,31 @@
 @import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+
+@theme {
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --color-paper: #edeff2;
+  --color-midnight: #18233a;
+  --color-ink: #1a2230;
+  --color-muted: #5b6676;
+  --color-line: #dde1e7;
+  --color-hover: #f6f7f9;
+  --color-signal: #2456e5;
+  --color-ok: #2e7d6b;
+  --color-risk: #d98a00;
+  --color-late: #c8372d;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
