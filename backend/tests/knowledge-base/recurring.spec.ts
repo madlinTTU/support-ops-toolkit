@@ -1,5 +1,5 @@
-import { generateTickets } from '../../scripts/generator/generate-tickets.js'
-import { RECURRING_TEMPLATES } from '../../scripts/generator/issue-templates.js'
+import { generateTickets } from '../../src/demo/generator/generate-tickets.js'
+import { RECURRING_TEMPLATES } from '../../src/demo/generator/issue-templates.js'
 import { findRecurringGroups } from '../../src/knowledge-base/recurring.js'
 import type { ClosedTicket } from '../../src/knowledge-base/recurring.js'
 import { triageTicket } from '../../src/triage/triage.js'

@@ -1,4 +1,4 @@
-import { generateTickets } from '../../scripts/generator/generate-tickets.js'
+import { generateTickets } from '../../src/demo/generator/generate-tickets.js'
 import { triageTicket } from '../../src/triage/triage.js'
 
 // The generator knows the correct answer for every ticket (expectedCategory, expectedPriority).

@@ -1,4 +1,4 @@
-import type { TicketCategory, TicketPriority } from '../../src/tickets/ticket.types.js'
+import type { TicketCategory, TicketPriority } from '../../tickets/ticket.types.js'
 
 export interface IssueTemplate {
   id: string
