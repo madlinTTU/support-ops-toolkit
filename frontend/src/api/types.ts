@@ -59,6 +59,32 @@ export interface TicketQuery extends TicketFilters {
   search: string
 }
 
+export interface VolumeByCategory {
+  category: string
+  ticketCount: number
+  percent: number
+}
+
+export interface TicketsPerDay {
+  day: string
+  ticketCount: number
+}
+
+export interface ResponseTimes {
+  priority: TicketPriority
+  ticketCount: number
+  averageMinutes: number
+  medianMinutes: number
+  p90Minutes: number
+}
+
+export interface TopRecurring {
+  id: number
+  category: string
+  subject: string
+  ticketCount: number
+}
+
 export interface KbCandidateQuery {
   category: TicketCategory | 'all'
   status: KbCandidateStatus | 'all'
