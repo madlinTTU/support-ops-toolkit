@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common'
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { ApiErrorResponses } from '../web/api-error-responses.js'
 import { KbCandidateResponse, UpdateKbCandidateBody } from './dto/kb-candidate.dto.js'
+import { ListKbCandidatesQuery } from './dto/list-kb-candidates-query.dto.js'
 import { KbCandidatesService } from './kb-candidates.service.js'
 
 @ApiTags('kb-candidates')
@@ -12,8 +13,9 @@ export class KbCandidatesController {
   @Get()
   @ApiOperation({ summary: 'List knowledge-base candidates, the ones with the most tickets first' })
   @ApiOkResponse({ type: [KbCandidateResponse] })
-  list(): Promise<KbCandidateResponse[]> {
-    return this.kbCandidatesService.list()
+  @ApiErrorResponses(400)
+  list(@Query() query: ListKbCandidatesQuery): Promise<KbCandidateResponse[]> {
+    return this.kbCandidatesService.list(query)
   }
 
   @Patch(':id')

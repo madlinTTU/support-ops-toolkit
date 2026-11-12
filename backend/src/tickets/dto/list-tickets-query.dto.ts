@@ -1,9 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { IsIn, IsOptional } from 'class-validator'
+import { SearchQuery } from '../../search/search-query.dto.js'
 import { TICKET_CATEGORIES, TICKET_STATUSES } from '../ticket.types.js'
 import type { TicketCategory, TicketStatus } from '../ticket.types.js'
 
-export class ListTicketsQuery {
+export class ListTicketsQuery extends SearchQuery {
   @ApiPropertyOptional({ enum: TICKET_STATUSES })
   @IsOptional()
   @IsIn(TICKET_STATUSES)
