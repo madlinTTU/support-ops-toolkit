@@ -1,7 +1,9 @@
 name: CI
 
+# A pull request is checked by its own run, so pushes are checked only on main (after a merge).
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
