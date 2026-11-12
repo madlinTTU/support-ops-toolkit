@@ -1,0 +1,10 @@
+.git
+.idea
+docs
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+backend/reports
+.env
+**/.env

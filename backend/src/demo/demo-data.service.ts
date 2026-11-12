@@ -5,7 +5,7 @@ import { PG_POOL } from '../database/database.module.js'
 import { KbService } from '../knowledge-base/kb.service.js'
 import { SlaService } from '../sla/sla.service.js'
 import { TriageService } from '../triage/triage.service.js'
-import { DEFAULT_COUNT, generateTickets } from './generator/generate-tickets.js'
+import { DEFAULT_COUNT, DEFAULT_SEED, generateTickets } from './generator/generate-tickets.js'
 
 const MAX_SEED = 2 ** 31
 
@@ -36,6 +36,15 @@ export class DemoDataService {
     private readonly slaService: SlaService,
     private readonly kbService: KbService,
   ) {}
+
+  // For the first start of a new database: fills it with data, or does nothing when there are tickets already.
+  async seedIfEmpty(): Promise<RegenerateResult | null> {
+    const { rows } = await this.pool.query<{ count: number }>('SELECT count(*)::int AS count FROM tickets')
+    if (rows[0].count > 0) {
+      return null
+    }
+    return this.regenerate(new Date(), DEFAULT_SEED)
+  }
 
   async regenerate(now: Date = new Date(), seed: number = randomInt(MAX_SEED)): Promise<RegenerateResult> {
     const tickets = generateTickets({ count: DEFAULT_COUNT, seed, now })
