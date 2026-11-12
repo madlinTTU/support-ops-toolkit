@@ -362,11 +362,12 @@ describe('API', () => {
     })
   })
 
-  async function insertCandidate(subject: string, ticketCount: number): Promise<number> {
+  async function insertCandidate(subject: string, ticketCount: number, exampleText = ''): Promise<number> {
     const result = await pool.query<{ id: number }>(
-      `INSERT INTO kb_candidates (category, representative_subject, ticket_count, first_seen_at, last_seen_at)
-       VALUES ('bug', $1, $2, now(), now()) RETURNING id`,
-      [subject, ticketCount],
+      `INSERT INTO kb_candidates (category, representative_subject, ticket_count, first_seen_at, last_seen_at,
+                                  representative_body)
+       VALUES ('bug', $1, $2, now(), now(), $3) RETURNING id`,
+      [subject, ticketCount, exampleText],
     )
     return result.rows[0].id
   }
@@ -374,12 +375,17 @@ describe('API', () => {
   describe('/api/kb-candidates', () => {
     it('listCandidates_twoCandidates_returnsThemWithMostTicketsFirst', async () => {
       await insertCandidate('Few tickets', 3)
-      await insertCandidate('Many tickets', 9)
+      await insertCandidate('Many tickets', 9, 'The export button does nothing.')
 
       const response = await request(app.getHttpServer()).get('/api/kb-candidates').expect(200)
 
       expect(response.body.map((row: { subject: string }) => row.subject)).toEqual(['Many tickets', 'Few tickets'])
-      expect(response.body[0]).toMatchObject({ category: 'bug', ticketCount: 9, status: 'proposed' })
+      expect(response.body[0]).toMatchObject({
+        category: 'bug',
+        ticketCount: 9,
+        status: 'proposed',
+        exampleText: 'The export button does nothing.',
+      })
     })
 
     it('decideCandidate_accepted_savesTheStatus', async () => {

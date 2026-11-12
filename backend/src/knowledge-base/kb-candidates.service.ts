@@ -5,7 +5,8 @@ import { NotFoundError } from '../web/app-error.js'
 import type { KbCandidateResponse, KbDecision } from './dto/kb-candidate.dto.js'
 
 const CANDIDATE_COLUMNS = `
-  id, category, representative_subject AS subject, ticket_count AS "ticketCount", status,
+  id, category, representative_subject AS subject, representative_body AS "exampleText",
+  ticket_count AS "ticketCount", status,
   first_seen_at AS "firstSeenAt", last_seen_at AS "lastSeenAt"
 `
 

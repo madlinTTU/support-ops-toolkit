@@ -1,5 +1,7 @@
 // Two tickets are similar when their share of common words is at least this value (0 to 1).
-export const SIMILARITY_THRESHOLD = 0.5
+// One problem is often written in different words, so the value is low. On the generated tickets different
+// problems start to merge only below 0.2.
+export const SIMILARITY_THRESHOLD = 0.3
 
 // A group of at least this many tickets becomes a knowledge-base candidate.
 export const MIN_GROUP_SIZE = 3
