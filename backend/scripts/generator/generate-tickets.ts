@@ -64,10 +64,9 @@ export function generateTickets({ count, seed, now }: GenerateOptions): Generate
   while (templates.length < count) {
     templates.push(faker.helpers.weightedArrayElement(recurringChoices))
   }
-  return (
-    templates.map((template) => buildTicket(template, now))
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-  )
+  return templates
+    .map((template) => buildTicket(template, now))
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 }
 
 function buildTicket(template: IssueTemplate, now: Date): GeneratedTicket {
