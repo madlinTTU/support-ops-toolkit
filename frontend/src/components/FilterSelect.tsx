@@ -13,7 +13,7 @@ export function FilterSelect<T extends string>({ label, value, options, onChange
     <label className="text-sm text-muted">
       {label}
       <select
-        className="ml-2 rounded-md border border-line bg-white px-3 py-1.5 text-ink"
+        className="ml-2 rounded-md border border-line bg-surface px-3 py-1.5 text-ink"
         value={value}
         onChange={(event) => onChange(options.find((option) => option === event.target.value) ?? 'all')}
       >

@@ -111,7 +111,7 @@ export function TicketDetail({ ticketId, onDismiss }: TicketDetailProps) {
   const query = useTicket(ticketId)
 
   return (
-    <aside className="sticky top-8 max-h-[calc(100vh-4rem)] w-[26rem] shrink-0 self-start overflow-y-auto rounded-lg border border-line bg-white p-6">
+    <aside className="sticky top-8 max-h-[calc(100vh-4rem)] w-[26rem] shrink-0 self-start overflow-y-auto rounded-lg border border-line bg-surface p-6">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-sm text-muted">Ticket {ticketId}</span>
         <button

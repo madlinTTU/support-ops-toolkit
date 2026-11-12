@@ -13,7 +13,7 @@ const HEADER = 'px-4 py-3 text-left text-sm font-medium text-muted'
 
 export function KbCandidatesTable({ candidates, isPending, onDecide }: KbCandidatesTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-white">
+    <div className="overflow-hidden rounded-lg border border-line bg-surface">
       <table className="w-full text-sm">
         <thead className="border-b border-line">
           <tr>

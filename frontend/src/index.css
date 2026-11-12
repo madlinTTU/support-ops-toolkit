@@ -6,6 +6,7 @@
 @theme {
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
   --color-paper: #edeff2;
+  --color-surface: #ffffff;
   --color-midnight: #18233a;
   --color-ink: #1a2230;
   --color-muted: #5b6676;
@@ -15,6 +16,37 @@
   --color-ok: #2e7d6b;
   --color-risk: #d98a00;
   --color-late: #c8372d;
+}
+
+:root {
+  color-scheme: light dark;
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-grid: #e6e8ec;
+  --chart-axis: #c3c9d2;
+}
+
+/* The same names with the dark values: the whole app (and the charts) switch with the system theme. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #0f141b;
+    --color-surface: #1a202a;
+    --color-midnight: #0b101a;
+    --color-ink: #e6e9ee;
+    --color-muted: #9aa4b2;
+    --color-line: #2a3341;
+    --color-hover: #202836;
+    --color-signal: #3d6df0;
+    --color-ok: #4fb39b;
+    --color-risk: #e0a02b;
+    --color-late: #e5584c;
+    --chart-1: #3987e5;
+    --chart-2: #d95926;
+    --chart-3: #199e70;
+    --chart-grid: #2a3341;
+    --chart-axis: #3a4455;
+  }
 }
 
 body {

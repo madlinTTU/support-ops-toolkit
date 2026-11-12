@@ -21,7 +21,7 @@ function rowStyle(ticket: Ticket, selected: boolean): string {
 
 export function TicketTable({ tickets, selectedId, onSelect }: TicketTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-white">
+    <div className="overflow-hidden rounded-lg border border-line bg-surface">
       <table className="w-full text-sm">
         <thead className="border-b border-line">
           <tr>
