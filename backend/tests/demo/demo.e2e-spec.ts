@@ -73,6 +73,17 @@ describe('Demo data', () => {
       expect(await countTickets()).toBe(GENERATED_COUNT)
     })
 
+    it('seedIfEmpty_emptyDatabase_fillsItOnce', async () => {
+      const service = app.get(DemoDataService)
+
+      const first = await service.seedIfEmpty()
+      const second = await service.seedIfEmpty()
+
+      expect(first?.createdTickets).toBe(GENERATED_COUNT)
+      expect(second).toBeNull()
+      expect(await countTickets()).toBe(GENERATED_COUNT)
+    })
+
     it('regenerate_withoutSeed_createsDifferentDataEveryTime', async () => {
       const service = app.get(DemoDataService)
       const readTexts = async () => (await pool.query('SELECT subject, body FROM tickets ORDER BY id')).rows
