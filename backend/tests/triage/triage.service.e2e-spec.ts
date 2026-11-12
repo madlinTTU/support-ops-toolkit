@@ -33,7 +33,7 @@ describe('TriageService', () => {
        VALUES ($1, $2, $3, 'email', $4, $5) RETURNING id`,
       [subject, body, TEST_EMAIL, status, new Date()],
     )
-    return rows[0]!.id
+    return rows[0].id
   }
 
   async function loadTicket(id: number) {

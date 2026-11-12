@@ -44,7 +44,7 @@ describe('SlaService', () => {
        VALUES ('subject', 'body', $1, 'email', $2, $3, $4) RETURNING id`,
       [TEST_EMAIL, status, createdAt, dueAt],
     )
-    return rows[0]!.id
+    return rows[0].id
   }
 
   async function loadTicket(id: number) {

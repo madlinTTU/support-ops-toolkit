@@ -24,6 +24,8 @@ async function main(): Promise<void> {
   try {
     await client.query('BEGIN')
     const cleared = await client.query("DELETE FROM tickets WHERE customer_email LIKE '%@example.com'")
+    // Candidates are built from the tickets that were just removed.
+    await client.query('DELETE FROM kb_candidates')
     for (const ticket of tickets) {
       await client.query(INSERT_TICKET, [
         ticket.subject,
