@@ -54,7 +54,11 @@ export class KbService {
   }
 
   // Updates the candidate this group already has, or creates a new one. Returns the candidate id.
-  private async saveCandidate(client: pg.PoolClient, group: RecurringGroup, usedCandidateIds: Set<number>): Promise<number> {
+  private async saveCandidate(
+    client: pg.PoolClient,
+    group: RecurringGroup,
+    usedCandidateIds: Set<number>,
+  ): Promise<number> {
     const times = group.tickets.map((ticket) => ticket.createdAt.getTime())
     const values = [
       group.category,
