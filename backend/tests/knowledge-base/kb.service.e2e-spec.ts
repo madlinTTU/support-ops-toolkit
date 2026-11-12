@@ -68,6 +68,7 @@ describe('KbService', () => {
     expect(candidate.ticket_count).toBe(4)
     expect(candidate.category).toBe('bug')
     expect(candidate.representative_subject).toBe('Zorblax widget crashes on startup')
+    expect(candidate.representative_body).toBe('The zorblax widget crashes every startup, quibble needed')
     expect(candidate.status).toBe('proposed')
     expect(candidate.first_seen_at).toEqual(firstDay)
     expect(candidate.last_seen_at).toEqual(new Date(firstDay.getTime() + 5 * DAY_MS))

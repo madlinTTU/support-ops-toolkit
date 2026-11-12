@@ -70,6 +70,37 @@ describe('findRecurringGroups', () => {
 
     expect(findRecurringGroups(tickets)[0].representativeSubject).toBe('password reset email link')
   })
+
+  it('findRecurringGroups_group_usesBodyOfTheSameTicketAsTheSubject', () => {
+    const tickets = [
+      ticket('bug', 'password reset email', 'first text'),
+      ticket('bug', 'password reset email link', 'middle text'),
+      ticket('bug', 'password reset email link spam', 'last text'),
+    ]
+
+    const group = findRecurringGroups(tickets)[0]
+
+    expect(group.representativeSubject).toBe('password reset email link')
+    expect(group.representativeBody).toBe('middle text')
+  })
+
+  it('findRecurringGroups_sameProblemInDifferentWords_returnsOneGroup', () => {
+    const subject = 'Password reset email not arriving'
+    const forgot = 'I forgot my password and the reset email does not show up in my inbox.'
+    const requested = 'I requested a password reset but the email never arrives in my inbox.'
+    // Two tickets per wording: each wording alone is too small, together they are one problem.
+    const tickets = [
+      ticket('account_access', subject, forgot),
+      ticket('account_access', subject, forgot),
+      ticket('account_access', subject, requested),
+      ticket('account_access', subject, requested),
+    ]
+
+    const groups = findRecurringGroups(tickets)
+
+    expect(groups).toHaveLength(1)
+    expect(groups[0].tickets).toHaveLength(4)
+  })
 })
 
 describe('findRecurringGroups on generated tickets', () => {
@@ -95,6 +126,19 @@ describe('findRecurringGroups on generated tickets', () => {
     for (const template of RECURRING_TEMPLATES) {
       expect(typesInGroups).toContain(template.id)
     }
+  })
+
+  it('findRecurringGroups_generatedTickets_differentProblemsAreNeverInOneGroup', () => {
+    for (const group of groups) {
+      const types = new Set(group.tickets.map((t) => issueTypeById.get(t.id)))
+      expect(types.size).toBe(1)
+    }
+  })
+
+  it('findRecurringGroups_generatedTickets_aProblemIsRarelySplitIntoSeveralGroups', () => {
+    // Without splitting there is one group per problem. Some splitting is accepted, a problem written in
+    // very different words can stay apart.
+    expect(groups.length).toBeLessThanOrEqual(RECURRING_TEMPLATES.length * 1.5)
   })
 
   it('findRecurringGroups_generatedTickets_oneOffProblemsDoNotBecomeCandidates', () => {
