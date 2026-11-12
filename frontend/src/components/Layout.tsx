@@ -18,6 +18,9 @@ export function Layout() {
           <NavLink to="/kb-candidates" className={navStyle}>
             Knowledge base
           </NavLink>
+          <NavLink to="/stats" className={navStyle}>
+            Statistics
+          </NavLink>
         </nav>
         <div className="mt-auto border-t border-white/10 px-3 pt-6">
           <Vitals />

@@ -13,7 +13,7 @@ export function SearchInput({ value, onChange, placeholder }: SearchInputProps) 
       placeholder={placeholder}
       aria-label="Search"
       maxLength={100}
-      className="w-64 rounded-md border border-line bg-white px-3 py-1.5 text-sm placeholder:text-muted"
+      className="w-64 rounded-md border border-line bg-surface px-3 py-1.5 text-sm placeholder:text-muted"
     />
   )
 }
