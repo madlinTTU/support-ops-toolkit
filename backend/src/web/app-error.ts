@@ -1,4 +1,4 @@
-export type ErrorType = 'bad_request' | 'not_found' | 'conflict' | 'internal_error'
+export type ErrorType = 'bad_request' | 'not_found' | 'conflict' | 'too_many_requests' | 'internal_error'
 
 export class AppError extends Error {
   constructor(
@@ -20,5 +20,11 @@ export class NotFoundError extends AppError {
 export class ConflictError extends AppError {
   constructor(code: string, message: string) {
     super(409, 'conflict', code, message)
+  }
+}
+
+export class TooManyRequestsError extends AppError {
+  constructor(code: string, message: string) {
+    super(429, 'too_many_requests', code, message)
   }
 }

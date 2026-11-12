@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { SLA_HOURS } from '../../src/sla/sla.constants.js'
-import type { TicketCategory, TicketChannel, TicketPriority, TicketStatus } from '../../src/tickets/ticket.types.js'
+import { SLA_HOURS } from '../../sla/sla.constants.js'
+import type { TicketCategory, TicketChannel, TicketPriority, TicketStatus } from '../../tickets/ticket.types.js'
 import { ONE_OFF_TEMPLATES, RECURRING_TEMPLATES } from './issue-templates.js'
 import type { IssueTemplate } from './issue-templates.js'
 
