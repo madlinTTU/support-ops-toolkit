@@ -91,6 +91,15 @@ export interface KbCandidateQuery {
   search: string
 }
 
+export interface ResetResult {
+  seed: number
+  removedTickets: number
+  createdTickets: number
+  triagedTickets: number
+  escalatedTickets: number
+  candidates: number
+}
+
 export interface ApiErrorBody {
   type: string
   message: string

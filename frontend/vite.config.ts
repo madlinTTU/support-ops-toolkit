@@ -9,6 +9,7 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   server: {
-    proxy: { '/api': 'http://localhost:3000' },
+    // The address of the backend can be changed, for example to try the page against another server.
+    proxy: { '/api': process.env.API_PROXY_TARGET ?? 'http://localhost:3000' },
   },
 })

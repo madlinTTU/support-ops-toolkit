@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
+import { DemoReset } from '@/components/DemoReset'
 import { Vitals } from '@/components/Vitals'
 
 function navStyle({ isActive }: { isActive: boolean }): string {
@@ -22,6 +23,7 @@ export function Layout() {
             Statistics
           </NavLink>
         </nav>
+        <DemoReset />
         <div className="mt-auto border-t border-white/10 px-3 pt-6">
           <Vitals />
         </div>
