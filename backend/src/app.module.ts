@@ -5,9 +5,19 @@ import { HealthModule } from './health/health.module.js'
 import { KbModule } from './knowledge-base/kb.module.js'
 import { ReportsModule } from './reports/reports.module.js'
 import { SlaModule } from './sla/sla.module.js'
+import { TicketsModule } from './tickets/tickets.module.js'
 import { TriageModule } from './triage/triage.module.js'
 
 @Module({
-  imports: [ScheduleModule.forRoot(), HealthModule, TriageModule, SlaModule, KbModule, AnalyticsModule, ReportsModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    HealthModule,
+    TriageModule,
+    SlaModule,
+    KbModule,
+    AnalyticsModule,
+    ReportsModule,
+    TicketsModule,
+  ],
 })
 export class AppModule {}
