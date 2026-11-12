@@ -1,17 +1,16 @@
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import pg from 'pg'
+import type pg from 'pg'
 import { KbService } from '../../src/knowledge-base/kb.service.js'
+import { startTestDatabase } from '../analytics/test-database.js'
 
-const ENV_FILE = fileURLToPath(new URL('../../.env', import.meta.url))
 const TEST_EMAIL = 'kb-test@example.com'
 const DAY_MS = 86_400_000
 const firstDay = new Date('2026-03-01T10:00:00Z')
 
-// Needs a running PostgreSQL with migrations applied (see DATABASE_URL in backend/.env).
+// Needs Docker: every run starts a clean PostgreSQL container.
 // The words are invented, so these tickets never look similar to the seeded ones.
 describe('KbService', () => {
   let pool: pg.Pool
+  let stopDatabase: () => Promise<void>
   let service: KbService
 
   async function cleanUp() {
@@ -21,11 +20,10 @@ describe('KbService', () => {
     )
   }
 
-  beforeAll(() => {
-    if (existsSync(ENV_FILE)) {
-      process.loadEnvFile(ENV_FILE)
-    }
-    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+  beforeAll(async () => {
+    const database = await startTestDatabase()
+    pool = database.pool
+    stopDatabase = database.stop
     service = new KbService(pool)
   })
 
@@ -33,7 +31,7 @@ describe('KbService', () => {
 
   afterAll(async () => {
     await cleanUp()
-    await pool.end()
+    await stopDatabase()
   })
 
   async function insertTicket(day: number, status = 'closed'): Promise<number> {

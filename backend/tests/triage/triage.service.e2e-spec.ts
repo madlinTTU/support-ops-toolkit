@@ -1,20 +1,18 @@
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import pg from 'pg'
+import type pg from 'pg'
 import { TriageService } from '../../src/triage/triage.service.js'
+import { startTestDatabase } from '../analytics/test-database.js'
 
-const ENV_FILE = fileURLToPath(new URL('../../.env', import.meta.url))
 const TEST_EMAIL = 'triage-test@example.com'
 
 describe('TriageService', () => {
   let pool: pg.Pool
+  let stopDatabase: () => Promise<void>
   let service: TriageService
 
-  beforeAll(() => {
-    if (existsSync(ENV_FILE)) {
-      process.loadEnvFile(ENV_FILE)
-    }
-    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+  beforeAll(async () => {
+    const database = await startTestDatabase()
+    pool = database.pool
+    stopDatabase = database.stop
     service = new TriageService(pool)
   })
 
@@ -24,7 +22,7 @@ describe('TriageService', () => {
 
   afterAll(async () => {
     await pool.query('DELETE FROM tickets WHERE customer_email = $1', [TEST_EMAIL])
-    await pool.end()
+    await stopDatabase()
   })
 
   async function insertTicket(subject: string, body: string, status: string): Promise<number> {

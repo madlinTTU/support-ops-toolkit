@@ -1,12 +1,10 @@
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { Test } from '@nestjs/testing'
 import { SchedulerRegistry } from '@nestjs/schedule'
-import pg from 'pg'
+import type pg from 'pg'
 import { AppModule } from '../../src/app.module.js'
 import { SlaService } from '../../src/sla/sla.service.js'
+import { startTestDatabase } from '../analytics/test-database.js'
 
-const ENV_FILE = fileURLToPath(new URL('../../.env', import.meta.url))
 const TEST_EMAIL = 'sla-test@example.com'
 const HOUR_MS = 3_600_000
 const MINUTE_MS = 60_000
@@ -16,16 +14,16 @@ function hoursFromNow(hours: number): Date {
   return new Date(now.getTime() + hours * HOUR_MS)
 }
 
-// Needs a running PostgreSQL with migrations applied (see DATABASE_URL in backend/.env).
+// Needs Docker: every run starts a clean PostgreSQL container.
 describe('SlaService', () => {
   let pool: pg.Pool
+  let stopDatabase: () => Promise<void>
   let service: SlaService
 
-  beforeAll(() => {
-    if (existsSync(ENV_FILE)) {
-      process.loadEnvFile(ENV_FILE)
-    }
-    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+  beforeAll(async () => {
+    const database = await startTestDatabase()
+    pool = database.pool
+    stopDatabase = database.stop
     service = new SlaService(pool)
   })
 
@@ -35,7 +33,7 @@ describe('SlaService', () => {
 
   afterAll(async () => {
     await pool.query('DELETE FROM tickets WHERE customer_email = $1', [TEST_EMAIL])
-    await pool.end()
+    await stopDatabase()
   })
 
   async function insertTicket(status: string, createdAt: Date, dueAt: Date | null): Promise<number> {
