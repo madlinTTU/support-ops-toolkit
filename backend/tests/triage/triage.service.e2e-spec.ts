@@ -30,15 +30,15 @@ describe('TriageService', () => {
   async function insertTicket(subject: string, body: string, status: string): Promise<number> {
     const { rows } = await pool.query<{ id: number }>(
       `INSERT INTO tickets (subject, body, customer_email, channel, status, created_at)
-       VALUES ($1, $2, $3, 'email', $4, now()) RETURNING id`,
-      [subject, body, TEST_EMAIL, status],
+       VALUES ($1, $2, $3, 'email', $4, $5) RETURNING id`,
+      [subject, body, TEST_EMAIL, status, new Date()],
     )
     return rows[0]!.id
   }
 
   async function loadTicket(id: number) {
     const { rows } = await pool.query(
-      'SELECT category, priority, tags, status, triaged_at FROM tickets WHERE id = $1',
+      'SELECT category, priority, tags, status, triaged_at, sla_due_at - created_at AS sla_window FROM tickets WHERE id = $1',
       [id],
     )
     return rows[0]
@@ -55,6 +55,7 @@ describe('TriageService', () => {
     expect(ticket.tags).toContain('charge')
     expect(ticket.status).toBe('queued')
     expect(ticket.triaged_at).not.toBeNull()
+    expect(ticket.sla_window).toEqual({ hours: 4 })
   })
 
   it('triageNewTickets_ticketAlreadyInProgress_keepsItsStatus', async () => {
