@@ -65,6 +65,12 @@ export class AnalyticsService {
     }))
   }
 
+  // The total row is always the last one.
+  async overallOnTimeRate(): Promise<OnTimeRateRow> {
+    const rows = await this.onTimeRate()
+    return rows[rows.length - 1]
+  }
+
   async volumeByCategory(now: Date = new Date()): Promise<VolumeRow[]> {
     const result = await this.pool.query<VolumeRow>(VOLUME_BY_CATEGORY, [toDay(now)])
     return result.rows
