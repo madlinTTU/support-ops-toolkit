@@ -27,6 +27,7 @@ export interface TicketFilter {
   status: TicketStatus | null
   category: TicketCategory | null
   escalated: boolean | null
+  search: string | null
 }
 
 export interface OpenCounts {
@@ -47,6 +48,7 @@ const SELECT_TICKETS = `
   WHERE ($1::text IS NULL OR status = $1)
     AND ($2::text IS NULL OR category = $2)
     AND ($3::boolean IS NULL OR escalated = $3)
+    AND ($4::text IS NULL OR subject ILIKE $4 OR body ILIKE $4)
   ORDER BY array_position(ARRAY['critical', 'high', 'normal', 'low'], priority), sla_due_at, id
 `
 
@@ -87,7 +89,12 @@ export class TicketsRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
   async findAll(filter: TicketFilter): Promise<TicketRow[]> {
-    const result = await this.pool.query<TicketRow>(SELECT_TICKETS, [filter.status, filter.category, filter.escalated])
+    const result = await this.pool.query<TicketRow>(SELECT_TICKETS, [
+      filter.status,
+      filter.category,
+      filter.escalated,
+      filter.search,
+    ])
     return result.rows
   }
 

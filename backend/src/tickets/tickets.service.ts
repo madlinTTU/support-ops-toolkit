@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { AnalyticsService } from '../analytics/analytics.service.js'
+import { toSearchPattern } from '../search/search.js'
 import { ConflictError, NotFoundError } from '../web/app-error.js'
 import type { ListTicketsQuery } from './dto/list-tickets-query.dto.js'
 import type { SummaryResponse } from './dto/summary-response.dto.js'
@@ -20,6 +21,7 @@ export class TicketsService {
       status: query.status ?? null,
       category: query.category ?? null,
       escalated: query.escalated === undefined ? null : query.escalated === 'true',
+      search: toSearchPattern(query.search),
     })
     return rows.map((row) => toResponse(row, now))
   }

@@ -1,9 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { decideKbCandidate, fetchKbCandidates } from '@/api/kb-candidates'
-import type { KbDecision } from '@/api/types'
+import type { KbCandidateQuery, KbDecision } from '@/api/types'
 
-export function useKbCandidates() {
-  return useQuery({ queryKey: ['kb-candidates'], queryFn: fetchKbCandidates })
+export function useKbCandidates(query: KbCandidateQuery) {
+  return useQuery({
+    queryKey: ['kb-candidates', query],
+    queryFn: () => fetchKbCandidates(query),
+    placeholderData: keepPreviousData,
+  })
 }
 
 interface Decision {

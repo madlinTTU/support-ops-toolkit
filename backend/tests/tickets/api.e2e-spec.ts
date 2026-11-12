@@ -12,6 +12,8 @@ import { startTestDatabase } from '../analytics/test-database.js'
 
 // Needs Docker: every run starts a clean PostgreSQL container.
 interface TestTicket {
+  subject?: string
+  body?: string
   status?: string
   priority?: string | null
   category?: string | null
@@ -57,7 +59,7 @@ describe('API', () => {
     const result = await pool.query<{ id: number }>(
       `INSERT INTO tickets (subject, body, customer_email, channel, status, priority, category, escalated,
                             created_at, sla_due_at, first_response_at)
-       VALUES ('Subject', 'Body', 'customer@example.com', 'email', $1, $2, $3, $4, $5, $6, $7)
+       VALUES ($8, $9, 'customer@example.com', 'email', $1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
       [
         ticket.status ?? 'queued',
@@ -67,6 +69,8 @@ describe('API', () => {
         new Date(now - 60 * 60_000),
         dueAt,
         ticket.firstResponseAt ?? null,
+        ticket.subject ?? 'Subject',
+        ticket.body ?? 'Body',
       ],
     )
     return result.rows[0].id
@@ -144,6 +148,76 @@ describe('API', () => {
       expect(response.body.type).toBe('bad_request')
       expect(response.body.code).toBe('INVALID_INPUT')
       expect(response.body.message).toContain('status')
+    })
+
+    it('listTickets_searchInSubject_returnsMatchingTickets', async () => {
+      const wanted = await insertTicket({ subject: 'Password reset email not arriving' })
+      await insertTicket({ subject: 'Invoice is missing' })
+
+      const response = await request(app.getHttpServer()).get('/api/tickets?search=password').expect(200)
+
+      expect(response.body.map((ticket: { id: number }) => ticket.id)).toEqual([wanted])
+    })
+
+    it('listTickets_searchInBodyWithOtherLetterCase_returnsMatchingTickets', async () => {
+      const wanted = await insertTicket({ subject: 'Problem', body: 'The EXPORT button does nothing' })
+      await insertTicket({ subject: 'Other problem', body: 'Cannot sign in' })
+
+      const response = await request(app.getHttpServer()).get('/api/tickets?search=export button').expect(200)
+
+      expect(response.body.map((ticket: { id: number }) => ticket.id)).toEqual([wanted])
+    })
+
+    it('listTickets_searchTogetherWithStatusFilter_appliesBoth', async () => {
+      await insertTicket({ subject: 'Password reset', status: 'closed' })
+      const wanted = await insertTicket({ subject: 'Password reset', status: 'queued' })
+
+      const response = await request(app.getHttpServer()).get('/api/tickets?search=password&status=queued').expect(200)
+
+      expect(response.body.map((ticket: { id: number }) => ticket.id)).toEqual([wanted])
+    })
+
+    it('listTickets_searchWithPercentSign_findsOnlyTextsWithPercentSign', async () => {
+      const wanted = await insertTicket({ subject: 'Discount of 100% not applied' })
+      await insertTicket({ subject: 'Discount not applied' })
+
+      const response = await request(app.getHttpServer()).get('/api/tickets').query({ search: '100%' }).expect(200)
+
+      expect(response.body.map((ticket: { id: number }) => ticket.id)).toEqual([wanted])
+    })
+
+    it('listTickets_searchWithUnderscore_isNotAWildcard', async () => {
+      await insertTicket({ subject: 'Error ab in report' })
+      const wanted = await insertTicket({ subject: 'Error a_b in report' })
+
+      const response = await request(app.getHttpServer()).get('/api/tickets').query({ search: 'a_b' }).expect(200)
+
+      expect(response.body.map((ticket: { id: number }) => ticket.id)).toEqual([wanted])
+    })
+
+    it('listTickets_blankSearch_returnsAllTickets', async () => {
+      await insertTicket()
+      await insertTicket()
+
+      const response = await request(app.getHttpServer()).get('/api/tickets').query({ search: '   ' }).expect(200)
+
+      expect(response.body).toHaveLength(2)
+    })
+
+    it('listTickets_nothingFound_returnsEmptyList', async () => {
+      await insertTicket({ subject: 'Invoice is missing' })
+
+      await request(app.getHttpServer()).get('/api/tickets?search=zebra').expect(200).expect([])
+    })
+
+    it('listTickets_searchTooLong_returns400', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/tickets')
+        .query({ search: 'a'.repeat(101) })
+        .expect(400)
+
+      expect(response.body.type).toBe('bad_request')
+      expect(response.body.message).toContain('search')
     })
 
     it('listTickets_emptyTable_returnsEmptyList', async () => {
@@ -362,12 +436,17 @@ describe('API', () => {
     })
   })
 
-  async function insertCandidate(subject: string, ticketCount: number, exampleText = ''): Promise<number> {
+  async function insertCandidate(
+    subject: string,
+    ticketCount: number,
+    exampleText = '',
+    category = 'bug',
+  ): Promise<number> {
     const result = await pool.query<{ id: number }>(
       `INSERT INTO kb_candidates (category, representative_subject, ticket_count, first_seen_at, last_seen_at,
                                   representative_body)
-       VALUES ('bug', $1, $2, now(), now(), $3) RETURNING id`,
-      [subject, ticketCount, exampleText],
+       VALUES ($4, $1, $2, now(), now(), $3) RETURNING id`,
+      [subject, ticketCount, exampleText, category],
     )
     return result.rows[0].id
   }
@@ -386,6 +465,79 @@ describe('API', () => {
         status: 'proposed',
         exampleText: 'The export button does nothing.',
       })
+    })
+
+    it('listCandidates_searchInSubjectOrExampleText_returnsMatchingCandidates', async () => {
+      await insertCandidate('Password reset email not arriving', 5, 'I did not get the email')
+      await insertCandidate('Invoice missing', 4, 'My PASSWORD was changed and the invoice vanished')
+      await insertCandidate('Export fails', 3, 'The CSV file is empty')
+
+      const response = await request(app.getHttpServer()).get('/api/kb-candidates?search=password').expect(200)
+
+      expect(response.body.map((row: { subject: string }) => row.subject)).toEqual([
+        'Password reset email not arriving',
+        'Invoice missing',
+      ])
+    })
+
+    it('listCandidates_nothingFound_returnsEmptyList', async () => {
+      await insertCandidate('Export fails', 3, 'The CSV file is empty')
+
+      await request(app.getHttpServer()).get('/api/kb-candidates?search=zebra').expect(200).expect([])
+    })
+
+    it('listCandidates_searchWithPercentSign_isNotAWildcard', async () => {
+      await insertCandidate('Export fails', 3, 'The CSV file is empty')
+
+      await request(app.getHttpServer()).get('/api/kb-candidates').query({ search: '%' }).expect(200).expect([])
+    })
+
+    it('listCandidates_categoryFilter_returnsOnlyThatCategory', async () => {
+      await insertCandidate('Wrong amount charged', 6, '', 'billing')
+      await insertCandidate('Export fails', 3, '', 'bug')
+
+      const response = await request(app.getHttpServer()).get('/api/kb-candidates?category=billing').expect(200)
+
+      expect(response.body.map((row: { subject: string }) => row.subject)).toEqual(['Wrong amount charged'])
+    })
+
+    it('listCandidates_categoryTogetherWithSearch_appliesBoth', async () => {
+      await insertCandidate('Wrong amount charged', 6, '', 'billing')
+      await insertCandidate('Refund not received', 5, '', 'billing')
+      await insertCandidate('Amount shown wrong in export', 3, '', 'bug')
+
+      const response = await request(app.getHttpServer())
+        .get('/api/kb-candidates?category=billing&search=amount')
+        .expect(200)
+
+      expect(response.body.map((row: { subject: string }) => row.subject)).toEqual(['Wrong amount charged'])
+    })
+
+    it('listCandidates_unknownCategory_returns400', async () => {
+      const response = await request(app.getHttpServer()).get('/api/kb-candidates?category=weather').expect(400)
+
+      expect(response.body.type).toBe('bad_request')
+    })
+
+    it('listCandidates_statusFilter_returnsOnlyThatStatus', async () => {
+      const accepted = await insertCandidate('Accepted one', 6)
+      await insertCandidate('Still proposed', 5)
+      await pool.query("UPDATE kb_candidates SET status = 'accepted' WHERE id = $1", [accepted])
+
+      const response = await request(app.getHttpServer()).get('/api/kb-candidates?status=accepted').expect(200)
+
+      expect(response.body.map((row: { subject: string }) => row.subject)).toEqual(['Accepted one'])
+    })
+
+    it('listCandidates_unknownStatus_returns400', async () => {
+      await request(app.getHttpServer()).get('/api/kb-candidates?status=done').expect(400)
+    })
+
+    it('listCandidates_searchTooLong_returns400', async () => {
+      await request(app.getHttpServer())
+        .get('/api/kb-candidates')
+        .query({ search: 'a'.repeat(101) })
+        .expect(400)
     })
 
     it('decideCandidate_accepted_savesTheStatus', async () => {

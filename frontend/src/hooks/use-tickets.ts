@@ -1,7 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { fetchTickets } from '@/api/tickets'
-import type { TicketFilters } from '@/api/types'
+import type { TicketQuery } from '@/api/types'
 
-export function useTickets(filters: TicketFilters) {
-  return useQuery({ queryKey: ['tickets', filters], queryFn: () => fetchTickets(filters) })
+// The previous list stays on the screen while the new one loads, so typing in the search field does not flicker.
+export function useTickets(query: TicketQuery) {
+  return useQuery({
+    queryKey: ['tickets', query],
+    queryFn: () => fetchTickets(query),
+    placeholderData: keepPreviousData,
+  })
 }
